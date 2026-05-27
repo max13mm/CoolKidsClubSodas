@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cool Kids Club Sodas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fizz:#ff5e3a;
+    --fizz-deep:#e8420f;
+    --cream:#fdf6ec;
+    --ink:#1d1a16;
+    --steel:#3a4a52;
+    --mint:#1faa8e;
+    --card:#fffdf8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Bricolage Grotesque',sans-serif;
+    background:#ffffff;
+    color:var(--ink);
+    min-height:100%;
+    display:flex;
+    justify-content:center;
+    padding:24px 18px 40px;
+  }
+  .app{width:100%;max-width:440px;}
+
+  header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:16px;}
+  .logo{
+    font-weight:800;font-size:24px;letter-spacing:-.5px;line-height:1;
+    color:var(--ink);text-transform:uppercase;
+  }
+  .logo .sub{
+    display:block;font-family:'DM Mono',monospace;font-size:10px;
+    letter-spacing:2px;color:#555;margin-top:6px;font-weight:400;
+  }
+  .period{
+    font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;
+    letter-spacing:.5px;color:#555;text-align:right;line-height:1.4;flex-shrink:0;
+  }
+
+  /* Big register button */
+  .register{
+    width:100%;border:2px solid var(--ink);cursor:pointer;
+    background:linear-gradient(165deg,#22c55e,#15803d);
+    color:#fff;border-radius:28px;padding:38px 24px 32px;
+    box-shadow:0 6px 0 var(--ink);
+    position:relative;overflow:hidden;
+    transition:background .35s ease, transform .12s ease, box-shadow .12s ease;
+  }
+  .register.locked{
+    background:linear-gradient(165deg,#ef4444,#b91c1c);
+    box-shadow:0 6px 0 var(--ink);
+    cursor:not-allowed;
+  }
+  .register:active{transform:translateY(3px);box-shadow:0 3px 0 var(--ink);}
+
+  /* Cooldown / status bar */
+  .status-bar{
+    margin-top:14px;background:#ffffff;border:2px solid var(--ink);
+    border-radius:18px;padding:14px 18px;display:flex;align-items:center;gap:12px;
+  }
+  .status-bar .indicator{
+    width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;
+    box-shadow:0 0 0 4px rgba(34,197,94,.18);
+  }
+  .status-bar.locked .indicator{
+    background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.2);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(239,68,68,.06);}}
+  .status-bar .text{flex:1;min-width:0;}
+  .status-bar .text-top{
+    font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--steel);
+  }
+  .status-bar .text-main{font-size:14px;font-weight:600;color:var(--ink);margin-top:2px;}
+  .status-bar .progress{
+    height:6px;background:#f0e8d8;border-radius:3px;overflow:hidden;margin-top:10px;
+  }
+  .status-bar .progress-fill{
+    height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);
+    width:0%;transition:width .8s ease;border-radius:3px;
+  }
+  .register .bubbles{position:absolute;inset:0;pointer-events:none;}
+  .register .bubbles i{
+    position:absolute;bottom:-20px;background:rgba(255,255,255,.35);
+    border-radius:50%;animation:rise linear infinite;
+  }
+  @keyframes rise{
+    to{transform:translateY(-220px) scale(.4);opacity:0;}
+  }
+  .register .label{
+    font-size:13px;font-family:'DM Mono',monospace;letter-spacing:2px;
+    text-transform:uppercase;opacity:.85;
+  }
+  .register .big{font-size:34px;font-weight:800;letter-spacing:-.5px;margin-top:4px;line-height:1;}
+  .register .sub{font-size:13px;opacity:.8;margin-top:6px;}
+
+  /* Stat grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+  .stat{
+    background:#ffffff;border:2px solid var(--ink);border-radius:20px;
+    padding:18px 18px 20px;position:relative;
+  }
+  .stat .tag{
+    font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--steel);display:flex;align-items:center;gap:6px;
+  }
+  .stat .dot{width:7px;height:7px;border-radius:50%;background:var(--fizz);}
+  .stat .num{font-size:40px;font-weight:800;letter-spacing:-1.5px;margin-top:8px;line-height:1;}
+  .stat .note{font-size:11.5px;color:var(--steel);margin-top:6px;}
+  .stat.roi-good .dot{background:var(--mint);}
+  .stat.roi-good .num{color:var(--mint);}
+  .stat.roi-bad .dot{background:var(--fizz);}
+  .stat.roi-bad .num{color:var(--fizz-deep);}
+  .stat.saved .dot{background:var(--mint);}
+  .stat.saved .num{color:var(--mint);}
+
+  /* Footer actions */
+  .actions{display:flex;justify-content:space-between;align-items:center;margin-top:22px;}
+  .undo{
+    background:#ffffff;border:2px solid var(--ink);border-radius:14px;
+    padding:10px 16px;font-family:'DM Mono',monospace;font-size:11px;
+    text-transform:uppercase;letter-spacing:1px;color:var(--ink);cursor:pointer;
+  }
+  .undo:active{background:#f1e8d8;}
+  .undo:disabled{opacity:.35;cursor:default;}
+  .total{font-family:'DM Mono',monospace;font-size:11px;color:var(--steel);text-align:right;}
+
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);
+    background:var(--ink);color:#fff;font-family:'DM Mono',monospace;font-size:12px;
+    padding:12px 20px;border-radius:14px;letter-spacing:.5px;
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.3);z-index:10;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">Cool Kids<br>Club Sodas<span class="sub">membership tracker</span></div>
+    <div class="period" id="period">cycle<br>—</div>
+  </header>
+
+  <button class="register" id="registerBtn" aria-label="Register a pop purchase">
+    <div class="bubbles" id="bubbles"></div>
+    <div class="label">+ tap to log</div>
+    <div class="big">Pop Bought</div>
+    <div class="sub" id="lastLog">No pops logged yet</div>
+  </button>
+
+  <div class="status-bar" id="statusBar">
+    <div class="indicator"></div>
+    <div class="text">
+      <div class="text-top" id="statusTop">Ready</div>
+      <div class="text-main" id="statusMain">No pops logged yet</div>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat">
+      <div class="tag"><span class="dot"></span>This Cycle</div>
+      <div class="num" id="countNum">0</div>
+      <div class="note">pops in current 30-day period</div>
+    </div>
+    <div class="stat saved">
+      <div class="tag"><span class="dot"></span>Saved</div>
+      <div class="num" id="savedNum">$0</div>
+      <div class="note">$2.00 value per pop</div>
+    </div>
+    <div class="stat">
+      <div class="tag"><span class="dot"></span>All-Time #</div>
+      <div class="num" id="allNum">0</div>
+      <div class="note">total pops ever logged</div>
+    </div>
+    <div class="stat" id="roiCard">
+      <div class="tag"><span class="dot"></span>ROI</div>
+      <div class="num" id="roiNum">-$15</div>
+      <div class="note" id="roiNote">$15 to break even on membership</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="undo" id="undoBtn" disabled>Undo last</button>
+    <button class="undo" id="resetBtn">Reset all data</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Logged</div>
+
+<script>
+(function(){
+  var POP_VALUE = 2.00;      // value of one pop
+  var MEMBERSHIP = 15.00;    // membership cost per cycle
+  var COOLDOWN_MS = 4 * 60 * 60 * 1000;  // 4 hours between pops
+  var KEY = 'popTrackerLog';
+
+  // ---- Storage layer (swap this object to switch to a shared backend) ----
+  var storage = {
+    load: function(cb){
+      var data = [];
+      try { data = JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){}
+      cb(data);
+    },
+    save: function(data){
+      localStorage.setItem(KEY, JSON.stringify(data));
+    }
+  };
+  // To switch to shared mode, replace `storage` above with a backend version
+  // that fetches/posts to your Cloudflare Worker or Firebase endpoint.
+
+  var log = [];
+  storage.load(function(data){ log = data; render(); });
+
+  // ---- cycle: starts on the 15th of each month ----
+  function cycleStart(d){
+    d = new Date(d);
+    var y = d.getFullYear(), m = d.getMonth();
+    if (d.getDate() < 15){ m -= 1; if(m<0){m=11;y-=1;} }
+    return new Date(y, m, 15, 0,0,0,0);
+  }
+  function cycleEnd(start){
+    var e = new Date(start);
+    e.setMonth(e.getMonth()+1);
+    return e;
+  }
+  function fmtDate(d){
+    return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  }
+
+  function save(){ storage.save(log); }
+
+  function render(){
+    var now = new Date();
+    var start = cycleStart(now);
+    var end = cycleEnd(start);
+
+    var inCycle = log.filter(function(t){
+      var d = new Date(t);
+      return d >= start && d < end;
+    });
+
+    var count = inCycle.length;
+    var saved = count * POP_VALUE;
+    var roi = saved - MEMBERSHIP;   // starts at -$15, climbs as pops are logged
+
+    document.getElementById('period').innerHTML =
+      'cycle<br>' + fmtDate(start) + ' – ' + fmtDate(new Date(end-1));
+    document.getElementById('countNum').textContent = count;
+    document.getElementById('savedNum').textContent = '$' + saved.toFixed(0);
+    document.getElementById('allNum').textContent = log.length;
+
+    var roiNum = document.getElementById('roiNum');
+    var roiNote = document.getElementById('roiNote');
+    var roiCard = document.getElementById('roiCard');
+    roiCard.classList.remove('roi-good','roi-bad');
+    if (roi >= 0){
+      roiNum.textContent = '+$' + roi.toFixed(0);
+      roiNote.textContent = roi === 0 ? 'broke even on the $15 membership'
+                                      : 'profit over the $15 membership';
+      roiCard.classList.add('roi-good');
+    } else {
+      roiNum.textContent = '-$' + Math.abs(roi).toFixed(0);
+      roiNote.textContent = '$' + Math.abs(roi).toFixed(0) + ' to break even on membership';
+      roiCard.classList.add('roi-bad');
+    }
+
+    var last = log[log.length-1];
+    var lastDate = last ? new Date(last) : null;
+    document.getElementById('lastLog').textContent = lastDate
+      ? 'Last: ' + lastDate.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
+      : 'No pops logged yet';
+
+    // ---- Cooldown / status bar ----
+    var btn = document.getElementById('registerBtn');
+    var bar = document.getElementById('statusBar');
+    var top = document.getElementById('statusTop');
+    var main = document.getElementById('statusMain');
+    var fill = document.getElementById('progressFill');
+
+    if (!lastDate){
+      btn.classList.remove('locked');
+      bar.classList.remove('locked');
+      top.textContent = 'Ready';
+      main.textContent = 'No pops logged yet — tap above to start';
+      fill.style.width = '100%';
+    } else {
+      var elapsed = Date.now() - lastDate.getTime();
+      var remaining = COOLDOWN_MS - elapsed;
+      var lastStr = lastDate.toLocaleString(undefined,{
+        weekday:'short', hour:'numeric', minute:'2-digit'
+      });
+      if (remaining > 0){
+        var hrs = Math.floor(remaining / 3600000);
+        var mins = Math.floor((remaining % 3600000) / 60000);
+        var waitStr = hrs > 0 ? hrs + 'h ' + mins + 'm' : mins + 'm';
+        btn.classList.add('locked');
+        bar.classList.add('locked');
+        top.textContent = 'Last pop: ' + lastStr;
+        main.textContent = 'Wait ' + waitStr + ' before next pop';
+        fill.style.width = ((elapsed / COOLDOWN_MS) * 100) + '%';
+      } else {
+        btn.classList.remove('locked');
+        bar.classList.remove('locked');
+        top.textContent = 'Last pop: ' + lastStr;
+        main.textContent = 'Ready for next pop';
+        fill.style.width = '100%';
+      }
+    }
+
+    document.getElementById('undoBtn').disabled = log.length === 0;
+  }
+
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._tm);
+    t._tm = setTimeout(function(){ t.classList.remove('show'); }, 1600);
+  }
+
+  function spawnBubbles(){
+    var box = document.getElementById('bubbles');
+    box.innerHTML = '';
+    for (var i=0;i<7;i++){
+      var b = document.createElement('i');
+      var s = 6 + Math.random()*14;
+      b.style.width = s+'px';
+      b.style.height = s+'px';
+      b.style.left = (8 + Math.random()*84)+'%';
+      b.style.animationDuration = (1.1 + Math.random()*1.1)+'s';
+      b.style.animationDelay = (Math.random()*.3)+'s';
+      box.appendChild(b);
+    }
+    setTimeout(function(){ box.innerHTML=''; }, 2600);
+  }
+
+  document.getElementById('registerBtn').addEventListener('click', function(){
+    var last = log[log.length-1];
+    if (last && Date.now() - last < COOLDOWN_MS){
+      var remaining = COOLDOWN_MS - (Date.now() - last);
+      var hrs = Math.floor(remaining / 3600000);
+      var mins = Math.floor((remaining % 3600000) / 60000);
+      toast('Wait ' + (hrs > 0 ? hrs + 'h ' + mins + 'm' : mins + 'm') + ' more');
+      return;
+    }
+    log.push(Date.now());
+    save();
+    render();
+    spawnBubbles();
+    toast('Pop logged 🥤');
+  });
+
+  // Refresh the cooldown bar every 30 seconds
+  setInterval(render, 30000);
+
+  document.getElementById('undoBtn').addEventListener('click', function(){
+    if (!log.length) return;
+    log.pop();
+    save();
+    render();
+    toast('Last pop removed');
+  });
+
+  var resetArmed = false;
+  var resetTimer;
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    var btn = this;
+    if (!resetArmed){
+      resetArmed = true;
+      btn.textContent = 'Tap again to erase';
+      btn.style.color = '#e8420f';
+      btn.style.borderColor = '#e8420f';
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(function(){
+        resetArmed = false;
+        btn.textContent = 'Reset all data';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 3000);
+      return;
+    }
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    btn.textContent = 'Reset all data';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    log = [];
+    save();
+    render();
+    toast('All data cleared');
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
